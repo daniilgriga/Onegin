@@ -4,8 +4,7 @@
 #include <assert.h>
 #include <stdlib.h>
 
-#define N_ROWS 15
-#define N_COLLS 50
+enum array {N_ROWS = 14, N_COLLS = 50};
 
 void swap (char* str1, char* str2);
 
@@ -26,17 +25,16 @@ int main (void)
         putchar('\n');
     }
 
-    printf("start");
+    putchar('\n');
 
     for (int i = 0; i < N_ROWS; i++)
     {
-        printf("start swapping1");
         for (int j = 0; j < N_ROWS - i - 1; j++)
         {
             int strcmp_result = strcmp(text[j], text[j+1]);
-            printf("start swapping2");
+
             if (strcmp_result > 0)
-                swap(text[j], text[j]);
+                swap(text[j], text[j + 1]);
         }
     }
 
@@ -49,9 +47,11 @@ int main (void)
     return 0;
 }
 
+static size_t max(size_t lhs, size_t rhs) { return lhs < rhs ? rhs : lhs; }
+
 void swap (char* str1, char* str2)
 {
-    char* change = (char*)calloc((strlen(str1) + 1), sizeof(char));
+    char* change = (char*)calloc(max(strlen(str1), strlen(str2)) + 1, sizeof(char));
 
     strcpy(change, str1);
     strcpy(str1  , str2);
