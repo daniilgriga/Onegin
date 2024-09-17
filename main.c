@@ -15,49 +15,156 @@
 #define BLUE_TEXT(text)       BLUE text CLEAR_COLOR
 #define GREEN_TEXT(text)      GREEN text CLEAR_COLOR
 
-void swap(void* addr_str1, void* addr_str2, size_t num);
+struct data_t
+{
+    char*  buffer;
+    long   file_size;
+    char** addr_strings;
+    size_t count_rows;
+};
 
+int file_reader (struct data_t* file);
+
+void count_symbols (struct data_t* onegin, FILE* file);
+
+size_t count_rows (struct data_t onegin);
+
+void array_of_pointers (struct data_t* onegin);
+
+int my_strcmp(char* str1, char* str2);
+
+// void swap(void* addr_str1, void* addr_str2, size_t num);
+void swap (char **lhs, char **rhs);
 int compare_str (void* str1, void* str2);
-typedef int (*compare_func_t)(void* str1, void* str2);
 
-void sort (void* buffer, size_t n_rows, size_t el_size, compare_func_t compare_char);
+typedef int (*compare_func_t)(void* str1, void* str2);
+void sort (void* addr, size_t n_rows, size_t el_size, compare_func_t compare_char);
 
 int main (void)
 {
-    FILE * onegin = fopen( "onegin.txt", "r");
-    assert(onegin && "File reading error");
+    struct data_t onegin = {};
 
-    fseek(onegin, 0, SEEK_END);
-    long file_size = ftell(onegin);
-    rewind(onegin);
+    if(file_reader (&onegin) == 1)
+        printf("pizda");
 
-    char* buffer = (char*) calloc((size_t)file_size + 1, sizeof(char));
-    if (buffer == NULL)
-        printf("Storage error");
+    printf("%s\n", onegin.buffer);
 
-    size_t read_result = fread(buffer, 1, (size_t)file_size, onegin);
-    assert((read_result == (size_t)file_size) && "Read error");
+    onegin.count_rows = count_rows(onegin);
 
-    printf("%s", buffer);
+    array_of_pointers(&onegin);
 
-    size_t count_rows = 0;
-    for(int i = 0; i < file_size; i++)
+    sort (onegin.addr_strings, onegin.count_rows, sizeof(char), compare_str);
+
+    for (size_t i = 0; i < onegin.count_rows; i++)
+        printf("%s\n", onegin.addr_strings[i]);
+
+    free(onegin.buffer);
+    free(onegin.addr_strings);
+
+    return 0;
+}
+
+void sort (void* addr, size_t n_rows, size_t el_size, compare_func_t compare_type)
+{
+    for (size_t i = 0; i < n_rows; i++)
     {
-        if (buffer[i] == '\n')
-            count_rows++;
-    }
-    printf("\n%zu\n\n", count_rows);
+        for (size_t j = 0; j < n_rows - i - 1; j++)
+        {
+            char** elem_j  = (char**)addr + j * el_size;
+            char** elem_j1 = elem_j + 1;
 
-    char** addr_strings = (char**) calloc((size_t)count_rows + 1, sizeof(char*));
-    addr_strings[0] = buffer;
+            if (compare_type(elem_j, elem_j1) > 0)
+            {
+                swap(elem_j, elem_j1);
+            }
+        }
+    }
+}
+
+void swap(char** lhs, char** rhs)
+{
+    char* tmp = *lhs;
+    *lhs = *rhs;
+    *rhs = tmp;
+}
+
+int compare_str (void* str1, void* str2)
+{
+    return my_strcmp(*(char**)str1, *(char**)str2);
+}
+
+// 1 func without punctuation and spaces +
+//
+// ! struct addr string and length string
+// i am not a fool, i am debug king
+// i'll take you on the ring
+// you'll get your ping
+// ! reversed compared
+
+int file_reader (struct data_t* onegin)
+{
+    FILE* file = fopen("onegin.txt", "r");
+    if (file == NULL)
+    {
+        fprintf(stderr, "Open error");
+        return 1;
+    }
+
+    count_symbols (onegin, file);
+
+    onegin->buffer = (char*) calloc((size_t)(onegin->file_size) + 1, sizeof(char));
+    if (onegin->buffer == NULL)
+    {
+        fprintf(stderr, "Storage error");
+        return 1;
+    }
+
+    size_t read_result = fread(onegin->buffer, 1, (size_t)onegin->file_size, file);
+    if (read_result != (size_t)onegin->file_size)
+    {
+        fprintf(stderr, "Read error");
+        return 1;
+    }
+
+    fclose(file);
+
+    return 0;
+}
+
+void count_symbols (struct data_t* onegin, FILE* file)
+{
+    fseek(file, 0, SEEK_END);
+    onegin->file_size = ftell(file);
+    fseek(file, 0, SEEK_SET);
+}
+
+size_t count_rows (struct data_t onegin)
+{
+    onegin.count_rows = 0;
+    for(int i = 0; i < onegin.file_size; i++)
+    {
+        if (onegin.buffer[i] == '\n')
+            onegin.count_rows++;
+    }
+
+    return onegin.count_rows;
+}
+
+
+void array_of_pointers (struct data_t* onegin)
+{
+    onegin->addr_strings = (char**) calloc((size_t)onegin->count_rows + 1, sizeof(char*));
+    onegin->addr_strings[0] = onegin->buffer;
 
     int j = 0;
-    for(int i = 0; i < file_size; i++)
+    for(int i = 0; i < onegin->file_size; i++)
     {
-        if(buffer[i] == '\n')
+        if(onegin->buffer[i] == '\n')
         {
-            char* addr_n = &buffer[i];
-            addr_strings[j + 1] = addr_n + 1;
+            char* addr_n = &onegin->buffer[i];
+
+            onegin->addr_strings[j + 1] = addr_n + 1;
+
             *addr_n = '\0'; // clean '\n'
 
             if (*(addr_n - 1) == '\r')
@@ -65,88 +172,30 @@ int main (void)
             j++;
         }
     }
-
-    sort (addr_strings, count_rows, sizeof(char*), compare_str);
-
-    putchar('\n');
-
-    for (size_t i = 0; i < count_rows; i++)
-        printf("%s\n", addr_strings[i]);
-
-    putchar('\n');
-
-    fclose(onegin);
-    free(buffer);
-    free(addr_strings);
-
-    return 0;
 }
 
-void sort (void* addr_str, size_t n_rows, size_t el_size, compare_func_t compare_type)
+
+static size_t min_length(size_t lhs, size_t rhs) { return lhs > rhs ? rhs : lhs; }
+
+int my_strcmp(char* str1, char* str2)
 {
-    for (size_t i = 0; i < n_rows; i++)
+    size_t n_byte = min_length(strlen(str1), strlen(str2));
+
+    for (size_t i = 0; i < n_byte; i++)
     {
-        for (size_t j = 0; j < n_rows - i - 1; j++)
+
+        if (!isalpha(*str1))
+            ++str1;
+
+        if (!isalpha(*str2))
+            ++str2;
+
+        if (tolower(*str1) == tolower(*str2))
         {
-            void* elem_j  = (char*)addr_str + j * el_size;
-            void* elem_j1 = (char*)addr_str + (j + 1) * el_size;
-
-            printf(""PURPLE_TEXT("before compare: ")"addr_elem_j  = %p\n", elem_j);
-            printf(""PURPLE_TEXT("before compare: ")"addr_elem_j1 = %p\n", elem_j1);
-
-            printf(""PURPLE_TEXT("before compare: ")"elem_j  = <%s>\n", *(char**)elem_j);
-            printf(""PURPLE_TEXT("before compare: ")"elem_j1 = <%s>\n", *(char**)elem_j1);
-
-            if (compare_type(elem_j, elem_j1) > 0) // *(char**)n = (char*)n
-            {
-                printf(""BLUE_TEXT("before swap: ")"i = %zu: str[j]   = <%s>\n"
-                       "\t\t    str[j+1] = <%s>  \n", i, *(char**)elem_j, *(char**)elem_j1);
-
-                printf(""BLUE_TEXT("before swap: ")"elem_j  = %p\n", elem_j);
-                printf(""BLUE_TEXT("before swap: ")"elem_j1 = %p\n", elem_j1);
-
-                swap(elem_j, elem_j1, sizeof(elem_j1));
-
-                printf(""BLUE_TEXT("after swap: ")" i = %zu: str[j]  = <%s>\n"
-                       "\t\t    str[j+1] = %s\n\n", i, *(char**)elem_j, *(char**)elem_j1);
-
-                printf(""BLUE_TEXT("after swap: ")"elem_j  = %p\n", elem_j);
-                printf(""BLUE_TEXT("after swap: ")"elem_j1 = %p\n", elem_j1);
-            }
-
-            printf("\n-----------------------new iteration(i = %zu, j = %zu)-----------------------\n\n", i, j);
+            ++str1;
+            ++str2;
         }
-
-        printf("\n-----------------------new iteration(i = %zu)-----------------------\n\n", i);
     }
+
+    return (tolower(*str1) - tolower(*str2));
 }
-
-void swap(void* str1, void* str2, size_t num)
-{
-    printf("\n"LIGHT_BLUE_TEXT("swapping")"\n\n");
-    for (size_t i = 0; i < num; i++)
-    {
-        char c = ((char*)str1)[i];
-                 ((char*)str1)[i] = ((char*)str2)[i];
-                                    ((char*)str2)[i] = c;
-    }
-}
-
-int compare_str (void* str1, void* str2)
-{
-    putchar('\n');
-    printf(""GREEN_TEXT("in compare_char: ")"addr_elem_j  = %p\n"
-           "\t\t addr_elem_j1 = %p\n", (char*)str1, ((char*)str2));
-    printf(""GREEN_TEXT("in compare_char: ")"elem_j  = %p\n", str1);
-    printf(""GREEN_TEXT("in compare_char: ")"elem_j1 = %p\n\n", str2);
-
-    return strcmp(*(char**)str1, *(char**)str2);
-}
-
-// 1 func without punctuation and spaces
-//
-// ! struct addr string and length string
-// i am not a fool, i am debug king
-// i'll take you on the ring
-// you'll get your ping
-// ! reversed compared
