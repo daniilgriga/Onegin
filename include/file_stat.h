@@ -3,7 +3,7 @@
 
 int file_reader (struct data_t* onegin);
 
-void count_symbols (struct data_t* onegin, FILE* file);
+int count_symbols (struct data_t* onegin, FILE* file);
 
 size_t count_rows (struct data_t onegin);
 

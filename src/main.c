@@ -20,22 +20,24 @@
 // #define BLUE_TEXT(text)       BLUE text CLEAR_COLOR
 // #define GREEN_TEXT(text)      GREEN text CLEAR_COLOR
 
-void array_of_pointers (struct data_t* onegin);
+void create_array_of_pointers (struct data_t* onegin);
 
 int main (void)
 {
     struct data_t onegin = {};
 
-    if(file_reader (&onegin) == 1)
+    if(file_reader (&onegin) == 1) {
         printf("pizda");
+        return 1;
+    }
 
     printf("%s\n", onegin.buffer);
 
     onegin.count_rows = count_rows(onegin);
 
-    array_of_pointers(&onegin);
+    create_array_of_pointers(&onegin);
 
-    sort (onegin.addr_strings, onegin.count_rows, sizeof(char), reverse_compare_str);
+    sort (onegin.addr_strings, onegin.count_rows, sizeof(char*), reverse_compare_str);
 
     for (size_t i = 0; i < onegin.count_rows; i++)
         printf("%s\n", onegin.addr_strings[i]);
@@ -47,13 +49,12 @@ int main (void)
 }
 
 
-// // ! struct addr string and length string
+// struct addr string and length string
 // i am not a fool, i am debug king
 // i'll take you on the ring
 // you'll get your ping
-// //! reversed compared
 
-void array_of_pointers (struct data_t* onegin)
+void create_array_of_pointers (struct data_t* onegin)
 {
     onegin->addr_strings = (char**) calloc((size_t)onegin->count_rows + 1, sizeof(char*));
     onegin->addr_strings[0] = onegin->buffer;
@@ -61,7 +62,7 @@ void array_of_pointers (struct data_t* onegin)
     int j = 0;
     for(int i = 0; i < onegin->file_size; i++)
     {
-        if(onegin->buffer[i] == '\n')
+        if(onegin->buffer[i] == '\n') // ANCHOR
         {
             char* addr_n = &onegin->buffer[i];
 
@@ -69,7 +70,7 @@ void array_of_pointers (struct data_t* onegin)
 
             *addr_n = '\0'; // clean '\n'
 
-            if (*(addr_n - 1) == '\r')
+            if (addr_n > &onegin->buffer[0] && *(addr_n - 1) == '\r')
                 *(addr_n - 1) = '\0'; // clean '\r'
             j++;
         }
