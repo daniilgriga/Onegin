@@ -1,17 +1,16 @@
 #ifndef SORT_H_
 #define SORT_H_
 
-int compare_str (void* str1, void* str2);
-typedef int (*compare_func_t)(void* str1, void* str2);
+typedef int (*compare_func_t)(const void* str1, const void* str2);
+void sort (void* addr, size_t n_rows, size_t el_size,  compare_func_t compare_type);
 
-int reverse_compare_str (void* str1, void* str2);
+#if 0
+void my_qsort (void* addr, size_t n_rows, size_t el_size,  compare_func_t compare_type);
 
-void sort (void* addr, size_t n_rows, size_t el_size, compare_func_t compare_char);
+size_t seperation (void* arr_i, size_t left, size_t right, size_t el_size,  compare_func_t compare_type);
+#endif
 
 void swap (void *lhs, void *rhs, size_t el_size);
 
-int my_strcmp_forward(char* str1, char* str2);
 
-int my_strcmp_reverse(char const* str1, char const* str2);
-
-#endif
+#endif // SORT_H_

@@ -1,11 +1,10 @@
 #include <stdio.h>
 #include <string.h>
-#include <ctype.h>
 #include <stdlib.h>
 #include <assert.h>
 
 #include "struct.h"
-#include "file_stat.h"
+#include "file_data.h"
 
 int file_reader (struct data_t* onegin)
 {
@@ -55,15 +54,15 @@ int count_symbols (struct data_t* onegin, FILE* file)
     return 0;
 }
 
-size_t count_rows (struct data_t onegin)
+size_t count_rows (struct data_t* onegin)
 {
-    onegin.count_rows = 0;
+    onegin->count_rows = 0;
 
-    for(int i = 0; i < onegin.file_size; i++)
+    for(int i = 0; i < onegin->file_size; i++)
     {
-        if (onegin.buffer[i] == '\n')
-            onegin.count_rows++;
+        if (onegin->buffer[i] == '\n')
+            onegin->count_rows++;
     }
 
-    return onegin.count_rows;
+    return onegin->count_rows;
 }
