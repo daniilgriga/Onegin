@@ -10,6 +10,6 @@ int compare_int (const void* int1, const void* int2);
 
 int my_strcmp_forward(const void* slice1, const void* slice2);
 
-int my_strcmp_reverse(const void* slice1, const void* slice2s);
+int my_strcmp_reverse(const void* slice1, const void* slice2);
 
 #endif // COMPARES_H_
