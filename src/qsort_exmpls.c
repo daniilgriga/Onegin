@@ -1,6 +1,6 @@
 #include <stdio.h>
 
-#include "struct.h"
+#include "structs.h"
 #include "qsort_exmpls.h"
 #include "sort.h"
 #include "color_print.h"
@@ -24,7 +24,7 @@ void example_use_qsort_int (void) // -------------------------------- qsort for 
     puts("\n\n");
 }
 
-void example_use_qsort_str (struct data_t* onegin) // --------------- qsort for str type
+void example_use_qsort_str (struct file_data* onegin) // --------------- qsort for str type
 {
     printf(GREEN_TEXT("qsort for string usage example (onegin.txt):")"\n\n");
 

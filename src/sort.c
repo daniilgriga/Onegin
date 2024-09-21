@@ -4,7 +4,7 @@
 #include <stdlib.h>
 
 #include "sort.h"
-#include "struct.h"
+#include "structs.h"
 #include "compares.h"
 
 void sort (void* addr, size_t n_rows, size_t el_size, compare_func_t compare_type)

@@ -3,14 +3,14 @@
 #include <stdlib.h>
 #include <assert.h>
 
-#include "struct.h"
+#include "structs.h"
 #include "file_data.h"
 
-int file_reader (struct data_t* onegin)
+int file_reader (struct file_data* onegin, const char* file_read)
 {
     assert(onegin);
 
-    FILE* file = fopen("onegin.txt", "r");
+    FILE* file = fopen(file_read, "r");
     if (file == NULL)
     {
         fprintf(stderr, "Open error");
@@ -39,7 +39,7 @@ int file_reader (struct data_t* onegin)
     return 0;
 }
 
-int count_symbols (struct data_t* onegin, FILE* file)
+int count_symbols (struct file_data* onegin, FILE* file)
 {
     if (fseek(file, 0, SEEK_END) != 0)
         return -1;
@@ -54,7 +54,7 @@ int count_symbols (struct data_t* onegin, FILE* file)
     return 0;
 }
 
-size_t count_rows (struct data_t* onegin)
+size_t count_rows (struct file_data* onegin)
 {
     onegin->count_rows = 0;
 
